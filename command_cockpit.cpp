@@ -238,11 +238,32 @@ void readFileDescriptor(int fd, size_t bufferSize) {
     }
 }
 
+// Function to append content to a file
+void appendToFile(string filePath, string content) {
+    ofstream file(filePath, ios::app);
+    if (file.is_open()) {
+        file << content << endl;
+        cout << "Content appended to '" << filePath << "' successfully." << endl;
+        file.close();
+    } else {
+        cerr << "Error opening file '" << filePath << "': " << strerror(errno) << endl;
+    }
+}
+
+// Function to change file ownership
+void changeFileOwnership(string filePath, uid_t uid, gid_t gid) {
+    if (chown(filePath.c_str(), uid, gid) == 0) {
+        cout << "Ownership of file '" << filePath << "' changed successfully." << endl;
+    } else {
+        cerr << "Error changing ownership of file '" << filePath << "': " << strerror(errno) << endl;
+    }
+}
+
 
 int main() {
     int ch;
 
-    while (ch != 21) {
+    while (ch != 22) {
         cout << "-----------------Welcome to ZimOS---------------" << endl << endl;
         cout << "Enter 1 to list all files in a given directory" << endl;
         cout << "Enter 2 to move a file from one directory to another" << endl;
@@ -252,7 +273,7 @@ int main() {
         cout << "Enter 6 to create a file" << endl;
         cout << "Enter 7 to create a directory" << endl;
         cout << "Enter 8 to delete the whole directory" << endl;
-        cout << "Enter 9 to exit the program" << endl;
+        cout << "Enter 9 to append content to a file" << endl;
         cout << "Enter 10 to change the current directory" << endl;
         cout << "Enter 11 to print the current working directory" << endl;
         cout << "Enter 12 to create a hard link" << endl;
@@ -264,7 +285,8 @@ int main() {
         cout << "Enter 18 to get file descriptor" << endl;
         cout << "Enter 19 to change file access and modification times (utime)" << endl;
         cout << "Enter 20 to read from file using file descriptor" << endl;
-        cout << "Enter 21 to exit" << endl;
+        cout << "Enter 21 to change file ownership" << endl;
+        cout << "Enter 22 to exit" << endl;
         cout << "Enter your choice below" << endl;
         cin >> ch;
         cin.ignore(); // Consume the newline character after reading the number.
@@ -294,6 +316,10 @@ int main() {
         time_t modification_time;
         int read_fd;
         size_t read_buffer_size;
+        string chown_file_path;
+        string content;
+        uid_t uid; 
+        gid_t gid; 
 
         switch (ch) {
             case 1:
@@ -343,7 +369,11 @@ int main() {
                 deleteDirectoryFunc(del_dir_path);
                 break;
             case 9:
-                cout << "Exiting program." << endl;
+                cout << "Enter the absolute path of the file to append to: ";
+                getline(cin, create_file_path);
+                cout << "Enter the content to append: ";
+                getline(cin, content);
+                appendToFile(create_file_path, content);
                 break;
             case 10:
                 cout << "Enter the path to change the current directory to: ";
@@ -417,6 +447,16 @@ int main() {
                 readFileDescriptor(read_fd, read_buffer_size);
                 break;
             case 21:
+                cout << "Enter the absolute path of the file to change ownership: ";
+                getline(cin, chown_file_path);
+                cout << "Enter the new UID: ";
+                cin >> uid;
+                cout << "Enter the new GID: ";
+                cin >> gid;
+                cin.ignore();
+                changeFileOwnership(chown_file_path, uid, gid);
+                break;
+            case 22:
                 cout << "Exiting program." << endl;
                 break;
             default:
